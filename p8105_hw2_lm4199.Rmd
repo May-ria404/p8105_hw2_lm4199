@@ -1,0 +1,12 @@
+---
+title: "Homework2"
+output: github_document
+---
+
+## Library
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
