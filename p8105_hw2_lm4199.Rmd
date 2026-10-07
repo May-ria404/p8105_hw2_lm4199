@@ -10,3 +10,24 @@ library(tidyverse)
 library(readxl)
 ```
 
+## Problem 1
+
+```{r}
+NY_transit_df =
+  read.csv(
+    "data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
+    na = c("",".","NA")
+  ) |>
+  janitor::clean_names() |>
+  select(line, station_name, station_latitude, station_longitude,
+         route1:route11, entry, vending, entrance_type,ada
+  ) |>
+  mutate(entry = case_match(
+    entry,
+    "YES" ~ TRUE,
+    "NO" ~ FALSE))
+
+NY_transit_df
+```
+
+
