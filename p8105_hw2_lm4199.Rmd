@@ -217,8 +217,7 @@ For the available data, Professor Trash Wheel collected a total of `r round(prof
 baseline_raw_df =
   read_csv(
     "data_mci/MCI_baseline.csv",
-    skip = 1,
-    na = c("", ".", "NA")
+    skip = 1, na = c("", ".", "NA")
   ) |>
   janitor::clean_names()
 
@@ -241,7 +240,6 @@ baseline_df =
   filter(
     is.na(mci_onset_age) | mci_onset_age > baseline_age)
 
-glimpse(baseline_df)
 ```
 
 ```{r}
@@ -276,7 +274,43 @@ The baseline dataset contains participants' ID, baseline age, sex, education, AP
 
 The original dataset contains `r recruited_count` participants. After excluding `r excluded_count` participants, `r eligible_count` remain, with one row per participant. Of these, `r mci_count` developed MCI during follow-up. The average baseline age is `r round(average_baseline_age, 2)` years. Among women, `r round(women_carrier_proportion * 100, 1)`% are APOE4 carriers.
 
+```{r}
+amyloid_df =
+  read_csv(
+    "data_mci/mci_amyloid.csv",
+    skip = 1, na = c("", ".", "NA", "Na")
+  ) |>
+  janitor::clean_names() |>
+  rename(id = study_id) |>
+  pivot_longer(
+    cols = baseline:time_8,
+    names_to = "time",
+    values_to = "amyloid_ratio"
+  ) |>
+  mutate(
+    time = case_match(time, "baseline" ~ 0,
+      "time_2" ~ 2, "time_4" ~ 4,
+      "time_6" ~ 6, "time_8" ~ 8)
+  )
 
+```
+
+```{r}
+amyloid_participant_count =
+  amyloid_df |>
+  distinct(id) |>
+  nrow()
+
+amyloid_missing_count =
+  sum(is.na(amyloid_df$amyloid_ratio))
+
+amyloid_observed_count =
+  sum(!is.na(amyloid_df$amyloid_ratio))
+```
+
+The amyloid dataset contains repeated measurements of the amyloid β42/40 ratio. I skipped the first description row, cleaned the column names, and treated both "NA" and "Na" as missing values. I renamed the participant ID column and changed the data from wide to long format. The time variable records years since baseline: 0, 2, 4, 6, and 8.
+
+The tidy dataset contains `r amyloid_participant_count` participants and `r nrow(amyloid_df)` participant-time records. Each row represents one participant at one time point. The three variables are ID, time, and amyloid ratio. I kept the missing measurements, including `r amyloid_missing_count` missing values and `r amyloid_observed_count` non-missing values.
 
 
 
