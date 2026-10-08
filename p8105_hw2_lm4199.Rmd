@@ -187,6 +187,32 @@ trash_wheel_df =
 ```
 
 
+```{r}
+professor_total_weight =
+  trash_wheel_df |>
+  filter(trash_wheel == "Professor Trash Wheel") |>
+  pull(weight_tons) |>
+  sum()
+professor_total_weight
+
+gwynnda_june_cigarettes =
+  trash_wheel_df |>
+  filter(
+    trash_wheel == "Gwynnda",
+    year == 2022,
+    month == "June"
+  ) |>
+  pull(cigarette_butts) |>
+  sum()
+gwynnda_june_cigarettes
+```
+
+The combined dataset contains `r nrow(trash_wheel_df)` observations from Mr. Trash Wheel, Professor Trash Wheel, and Gwynnda. Each observation is a dumpster record. 
+Key variables include the date, weight in tons, volume in cubic yards, and counts of items such as plastic bottles and cigarette butts. The `trash_wheel` variable shows which wheel each record comes from. Some variables are not available for all three wheels and are recorded as `NA`. 
+For the available data, Professor Trash Wheel collected a total of `r round(professor_total_weight, 2)` tons of trash. Gwynnda collected `r gwynnda_june_cigarettes` cigarette butts in June 2022.
+
+
+
 
 
 
