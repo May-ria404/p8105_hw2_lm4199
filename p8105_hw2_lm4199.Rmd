@@ -312,5 +312,36 @@ The amyloid dataset contains repeated measurements of the amyloid β42/40 ratio.
 
 The tidy dataset contains `r amyloid_participant_count` participants and `r nrow(amyloid_df)` participant-time records. Each row represents one participant at one time point. The three variables are ID, time, and amyloid ratio. I kept the missing measurements, including `r amyloid_missing_count` missing values and `r amyloid_observed_count` non-missing values.
 
+```{r}
+amyloid_ids =
+  amyloid_df |>
+  distinct(id)
+
+baseline_only_df =
+  baseline_df |>
+  anti_join(amyloid_ids, by = "id")
+
+amyloid_only_df =
+  amyloid_ids |>
+  anti_join(baseline_df, by = "id")
+
+baseline_only_count = nrow(baseline_only_df)
+amyloid_only_count = nrow(amyloid_only_df)
+
+combined_df =
+  baseline_df |>
+  inner_join(amyloid_df, by = "id")
+
+combined_participant_count =
+  combined_df |>
+  distinct(id) |>
+  nrow()
+
+write_csv(combined_df, "data/mci_combined.csv")
+```
+
+There are `r baseline_only_count` participants only in the cleaned baseline dataset and `r amyloid_only_count` participants only in the amyloid dataset. Of the amyloid-only participants, four were excluded from the baseline dataset because they already had MCI at baseline. The other 12 do not appear in the original baseline file.
+
+I combined the datasets using an inner join by participant ID, keeping only participants found in both datasets. The combined dataset contains `r combined_participant_count` participants, `r nrow(combined_df)` rows, and `r ncol(combined_df)` columns. Each row represents one participant at one time point and includes demographic information and the amyloid ratio. Missing biomarker values were retained. I exported the combined dataset to `data/mci_combined.csv`.
 
 
