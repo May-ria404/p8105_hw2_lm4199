@@ -211,8 +211,70 @@ The combined dataset contains `r nrow(trash_wheel_df)` observations from Mr. Tra
 Key variables include the date, weight in tons, volume in cubic yards, and counts of items such as plastic bottles and cigarette butts. The `trash_wheel` variable shows which wheel each record comes from. Some variables are not available for all three wheels and are recorded as `NA`. 
 For the available data, Professor Trash Wheel collected a total of `r round(professor_total_weight, 2)` tons of trash. Gwynnda collected `r gwynnda_june_cigarettes` cigarette butts in June 2022.
 
+## Problem 3
 
+```{r}
+baseline_raw_df =
+  read_csv(
+    "data_mci/MCI_baseline.csv",
+    skip = 1,
+    na = c("", ".", "NA")
+  ) |>
+  janitor::clean_names()
 
+baseline_df =
+  baseline_raw_df |>
+  rename(
+    baseline_age = current_age,
+    mci_onset_age = age_at_onset
+  ) |>
+  mutate(
+    sex = factor(
+      sex,
+      levels = c(0, 1),
+      labels = c("Female", "Male")),
+    apoe4 = factor(
+      apoe4,
+      levels = c(0, 1),
+      labels = c("Non-carrier", "Carrier"))
+  ) |>
+  filter(
+    is.na(mci_onset_age) | mci_onset_age > baseline_age)
+
+glimpse(baseline_df)
+```
+
+```{r}
+recruited_count = nrow(baseline_raw_df)
+
+eligible_count = nrow(baseline_df)
+
+excluded_count = recruited_count - eligible_count
+
+mci_count =
+  baseline_df |>
+  summarise(
+    total = sum(!is.na(mci_onset_age))
+  ) |>
+  pull(total)
+
+average_baseline_age =
+  baseline_df |>
+  pull(baseline_age) |>
+  mean()
+
+women_carrier_proportion =
+  baseline_df |>
+  filter(sex == "Female") |>
+  summarise(
+    proportion = mean(apoe4 == "Carrier")
+  ) |>
+  pull(proportion)
+```
+
+The baseline dataset contains participants' ID, baseline age, sex, education, APOE4 carrier status, and age at MCI onset. I skipped the first row because it contains variable descriptions and treated "." as a missing value. I renamed the age variables and converted sex and APOE4 status to factors. I removed participants whose MCI onset age was less than or equal to their baseline age. Participants with missing onset age were retained because they remained MCI-free during follow-up.
+
+The original dataset contains `r recruited_count` participants. After excluding `r excluded_count` participants, `r eligible_count` remain, with one row per participant. Of these, `r mci_count` developed MCI during follow-up. The average baseline age is `r round(average_baseline_age, 2)` years. Among women, `r round(women_carrier_proportion * 100, 1)`% are APOE4 carriers.
 
 
 
