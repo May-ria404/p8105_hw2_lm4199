@@ -119,6 +119,8 @@ Of the stations that serve the A train, r a_ada_station_count are ADA compliant.
 
 ## Problem 2
 
+### Clean Mr. Trash Wheel
+
 ```{r}
 mr_trash_df =
   read_excel(
@@ -135,8 +137,54 @@ mr_trash_df =
   )
 ```
 
+### Clean Professor Trash Wheel
 
+```{r}
+professor_trash_df =
+  read_excel(
+    "data/202610 Trash Wheel Collection Data.xlsx",
+    sheet = "Professor Trash Wheel",
+    range = "A2:M139"
+  ) |>
+  janitor::clean_names() |>
+  filter(!is.na(dumpster)) |>
+  mutate(
+    plastic_bottles = as.numeric(
+      na_if(plastic_bottles, "dive")),
+    month = str_trim(month),
+    year = as.integer(year),
+    trash_wheel = "Professor Trash Wheel"
+  )
+```
 
+### Clean Gwynnda
+
+```{r}
+gwynnda_trash_df =
+  read_excel(
+    "data/202610 Trash Wheel Collection Data.xlsx",
+    sheet = "Gwynnda the Good Wheel of the W",
+    range = "A2:L394"
+  ) |>
+  janitor::clean_names() |>
+  filter(!is.na(dumpster)) |>
+  mutate(
+    month = str_trim(month),
+    year = as.integer(year),
+    trash_wheel = "Gwynnda"
+  )
+```
+
+### Combine these datasets
+
+```{r}
+trash_wheel_df =
+  bind_rows(
+    mr_trash_df,
+    professor_trash_df,
+    gwynnda_trash_df
+  )
+```
 
 
 
