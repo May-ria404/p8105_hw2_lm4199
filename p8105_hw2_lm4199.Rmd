@@ -115,3 +115,32 @@ a_ada_station_count =
 a_ada_station_count
 ```
 Of the stations that serve the A train, r a_ada_station_count are ADA compliant.
+
+
+## Problem 2
+
+```{r}
+mr_trash_df =
+  read_excel(
+    "data/202610 Trash Wheel Collection Data.xlsx",
+    sheet = "Mr. Trash Wheel", range = "A2:N742"
+  ) |>
+  janitor::clean_names() |>
+  filter(!is.na(dumpster)) |>
+  mutate(
+    sports_balls = as.integer(round(sports_balls)),
+    month = str_trim(month),
+    year = as.integer(year),
+    trash_wheel = "Mr. Trash Wheel"
+  )
+```
+
+
+
+
+
+
+
+
+
+
