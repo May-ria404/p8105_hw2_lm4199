@@ -26,8 +26,92 @@ NY_transit_df =
     entry,
     "YES" ~ TRUE,
     "NO" ~ FALSE))
-
-NY_transit_df
 ```
 
+### Write a short paragraph about this dataset
 
+This dataset contains information about subway entrances and exits in NYC. The variables include line, station name, station latitude and longitude, routes served, entry, vending, entrance type, and ADA compliance.
+I cleaned the column names, kept the required variables, and changed `entry` from YES/NO to TRUE/FALSE.
+The cleaned dataset has `r nrow(NY_transit_df)` rows and `r ncol(NY_transit_df)` columns. These data are not fully tidy because route names are stored in separate columns, from `route1` to `route11`.
+
+### Answer the following questions using these data
+
+```{r}
+station_count =
+  NY_transit_df |>
+  distinct(line, station_name) |>
+  nrow()
+
+station_count
+```
+There are r station_count distinct stations, identified by line and station name.
+
+```{r}
+ada_station_count =
+  NY_transit_df |>
+  filter(ada == TRUE) |>
+  distinct(line, station_name) |>
+  nrow()
+
+ada_station_count
+```
+There are r ada_station_count ADA-compliant stations.
+
+```{r}
+no_vending_summary =
+  NY_transit_df |>
+  filter(vending == "NO") |>
+  summarise(
+    total = n(),
+    allow_entry = sum(entry),
+    proportion = mean(entry)
+  )
+
+no_vending_summary
+```
+Among entrances and exits without vending, r round(no_vending_summary$proportion * 100, 2)% allow entry.
+
+### Reformat data and answer
+
+```{r}
+NY_transit_tidy_df =
+  NY_transit_df |>
+  mutate(
+    across(route1:route11, as.character)
+  ) |>
+  pivot_longer(
+    cols = route1:route11,
+    names_to = "route_number",
+    names_prefix = "route",
+    values_to = "route_name",
+    values_drop_na = TRUE
+  ) |>
+  mutate(
+    route_number = as.integer(route_number)
+  )
+```
+
+```{r}
+a_station_count =
+  NY_transit_tidy_df |>
+  filter(route_name == "A") |>
+  distinct(line, station_name) |>
+  nrow()
+
+a_station_count
+```
+After reshaping the route columns into route_number and route_name, there are r a_station_count distinct stations that serve the A train.
+
+```{r}
+a_ada_station_count =
+  NY_transit_tidy_df |>
+  filter(
+    route_name == "A",
+    ada == TRUE
+  ) |>
+  distinct(line, station_name) |>
+  nrow()
+
+a_ada_station_count
+```
+Of the stations that serve the A train, r a_ada_station_count are ADA compliant.
